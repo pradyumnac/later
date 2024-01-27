@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+# Export requirements from poetry
+APP_NAME=$(basename $(pwd))
+
+
+# verify that  Virtual environment is currently activated and its name is $(APP_NAME)-env
+if [[ ! "$VIRTUAL_ENV" == "$(APP_NAME)-env" ]]; then
+    echo " Virtual environment is not activated. Please run 'conda activate $(APP_NAME)-env' first."
+    exit 1
+fi
+
+# verify that the current working directory is the root of the project: src/__init__.py is present
+if [[ ! -f "src/__init__.py" ]]; then
+    echo "strt: This script must be run from the root of the project."
+    exit 1
+fi
+
+# Verify that .env file is present to run locally
+if [[ ! -f ".env" ]]; then
+    echo "No .env file found. Please create one."
+    exit 1
+fi
+ 
+
+# Verify if poetry toml is present (Necessary to export dependencies)
+if [[ ! -f "pyproject.toml" ]]; then
+    echo "pyproject.toml not found."
+    exit 1
+fi
+
+# Verify if poetry.lock is present (Necessary to export dependencies)
+if [[ ! -f "poetry.lock" ]]; then
+    echo "poetry.lock not found."
+    exit 1
+fi
+
+# export  Virtual environment to conda-environment.yml
+echo "Exporting  Virtual environment..."
+pip freeze >  requirements.txt
+
+echo "Exporting prod dependencies to requirements.txt..."
+poetry export --without-hashes -f requirements.txt |  awk '{ print $1 }' FS=';' > requirements.txt
+
+echo "Exporting dev dependencies to requirements-dev.txt..."
+poetry export --without-hashes --with dev -f requirements.txt | awk '{ print $1 }' FS=';' >  requirements.dev.txt

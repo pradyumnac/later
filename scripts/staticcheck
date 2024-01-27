@@ -1,0 +1,33 @@
+#!/bin/sh -e
+set -e
+APP_NAME=$(basename $(pwd))
+
+
+# verify that conda environment is currently activated and its name is $(APP_NAME)-env
+if [[ ! "$CONDA_DEFAULT_ENV" == "$(APP_NAME)-env" ]]; then
+    echo "Conda environment is not activated. Please run 'conda activate $(APP_NAME)-env' first."
+    exit 1
+fi
+
+# verify that the current working directory is the root of the project: src/__init__.py is present
+if [[ ! -f "src/__init__.py" ]]; then
+    echo "strt: This script must be run from the root of the project."
+    exit 1
+fi
+
+PYLINT_FAILURE_THRESHOLD=5.0
+
+echo "====== Static Check ======"
+
+# append current directory to PYTHONPATH
+# export PYTHONPATH=$PYTHONPATH:$(pwd)/src
+
+# run mypy
+echo "Running mypy..."
+# Add module to path
+cd src
+poetry run mypy --namespace-packages --explicit-package-bases . --config-file=../pyproject.toml
+cd -
+echo "Mypy OK"
+
+echo "====== Completed ======"

@@ -1,0 +1,20 @@
+#!/bin/sh -e
+set -x
+APP_NAME=$(basename $(pwd))
+
+
+# verify that conda environment is currently activated and its name is $(APP_NAME)-env
+if [[ ! "$VRTUAL_ENV" == "$(APP_NAME)-env" ]]; then
+    echo "Conda environment is not activated. Please run 'conda activate $(APP_NAME)-env' first."
+    exit 1
+fi
+
+# verify that the current working directory is the root of the project: src/__init__.py is present
+if [[ ! -f "src/__init__.py" ]]; then
+    echo "strt: This script must be run from the root of the project."
+    exit 1
+fi
+
+autoflake --remove-all-unused-imports --recursive --remove-unused-variables --in-place src --exclude=__init__.py
+isort src --profile black
+black src -v

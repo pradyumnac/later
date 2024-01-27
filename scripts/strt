@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Start web dev server
+APP_NAME=$(basename $(pwd))
+
+
+# verify that conda environment is currently activated and its name is $(APP_NAME)-env
+if [[ ! "$VIRTUAL_ENV" == "$(APP_NAME)-env" ]]; then
+    echo "Conda environment is not activated. Please run 'conda activate $(APP_NAME)-env' first."
+    exit 1
+fi
+
+# verify that the current working directory is the root of the project: src/__init__.py is present
+if [[ ! -f "src/__init__.py" ]]; then
+    echo "strt: This script must be run from the root of the project."
+    exit 1
+fi
+
+# Verify that .env file is present to run locally
+if [[ ! -f ".env" ]]; then
+    echo "No .env file found. Please create one."
+    exit 1
+fi
+
+# Add module to path
+# export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
+
+# This script is used to run the application locally.
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000

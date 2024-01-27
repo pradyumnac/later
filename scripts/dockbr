@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+APP_NAME=$(basename $(pwd))
+
+# Stop and remove this docker container including orphans if exists
+docker stop $(APP_NAME)-svc > /dev/null 2>&1 && docker rm $(APP_NAME)-svc > /dev/null 2>&1
+
+# Build the docker image
+docker build -t $(APP_NAME) .
+# check image size
+echo -n "Image size:"
+docker images|rg $(APP_NAME)|awk '{print $7}'
+
+# Run the docker image
+docker run -p 8000:80 --name $(APP_NAME)-svc -d --env-file ./.env $(APP_NAME) 
+
+# Check the docker container is running
+docker ps | grep $(APP_NAME)-svc
